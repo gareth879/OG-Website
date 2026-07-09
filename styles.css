@@ -566,3 +566,26 @@ footer{background:#000;border-top:1px solid rgba(255,255,255,.06);padding:36px 4
   .beliefs-grid,.tier-grid,.compare-grid,.g-cond-grid{grid-template-columns:1fr}
   .g-numbers{grid-template-columns:repeat(3,1fr)}
 }
+
+
+/* ━━━ GREEN CALLOUTS ━━━ */
+.gpill{display:inline-flex;align-items:center;gap:10px;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.42);border-radius:100px;padding:10px 20px;font-size:14px;font-weight:600;color:#4ade80;box-shadow:0 0 26px rgba(34,197,94,.14)}
+.gpill svg{flex-shrink:0}
+.hl-green{color:#4ade80}
+
+/* ━━━ BUTTON ARROWS NEVER WRAP ━━━ */
+.btn-primary,.btn-outline,.tier-cta,.svc-link{white-space:nowrap}
+
+/* ━━━ HERO SUB-LINE ALWAYS ONE LINE ━━━ */
+.hero-headline .sub-line{font-size:min(.55em,5.8vw);white-space:nowrap}
+
+/* ━━━ MOBILE POLISH ━━━ */
+@media(max-width:860px){
+  header .btn-primary{display:none}
+  .btn-primary{font-size:14px;padding:14px 22px}
+  .sec-white,.sec-navy,.sec-offwhite,.problem,.system,.services,.proof,.who,.objections,.before-after,.founder,.meta-ads,.strip-flatline,.stats-band,.final-cta{padding:64px 0}
+  footer{flex-direction:column;align-items:center;text-align:center;gap:22px;padding:40px 24px}
+  .footer-nav{justify-content:center;gap:14px 22px}
+  .footer-copy{color:rgba(255,255,255,.45)}
+  .gpill{font-size:12.5px;padding:9px 16px}
+}

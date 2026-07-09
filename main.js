@@ -161,12 +161,14 @@
         if (c.dataset.done) return;
         c.dataset.done = '1';
         var to = parseInt(c.getAttribute('data-to'), 10);
-        if (reduce || to === 0) { c.textContent = to; return; }
-        var t0 = null, dur = 1600;
+        var from = parseInt(c.getAttribute('data-from') || '0', 10);
+        var fmt = function(n){ return n.toLocaleString('en-US'); };
+        if (reduce || to === from) { c.textContent = fmt(to); return; }
+        var t0 = null, dur = from > to ? 2200 : 1600;
         function tick(t){
           if (!t0) t0 = t;
           var p = Math.min((t - t0) / dur, 1);
-          c.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+          c.textContent = fmt(Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))));
           if (p < 1) requestAnimationFrame(tick);
         }
         requestAnimationFrame(tick);
@@ -174,7 +176,7 @@
       chartIO.unobserve(e.target);
     });
   }, {threshold: 0.35});
-  document.querySelectorAll('.hero-dash,.chart-card,.stats-grid').forEach(function(el){ chartIO.observe(el); });
+  document.querySelectorAll('.hero-dash,.chart-card,.stats-grid,.g-numbers').forEach(function(el){ chartIO.observe(el); });
 
   /* ── Hero mouse parallax + dashboard tilt ── */
   var hero = document.getElementById('hero');
