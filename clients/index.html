@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Client Zone — OmniGrowth</title>
+<link rel="icon" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cz.css">
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="index.html">
+        <img src="/logo.png" alt="OmniGrowth" onerror="this.style.display='none'">
+        <span class="brand-text">OMNI<span>GROWTH</span></span>
+      </a>
+      <div class="who">
+        <span id="who-client"></span>
+        <span class="email" id="who-email"></span>
+        <a id="link-admin" class="pill blue" href="admin.html" hidden>Admin</a>
+        <button class="btn ghost sm" id="btn-signout">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-view="home">Home</button>
+      <button class="tab" data-view="dashboard">Dashboard</button>
+      <button class="tab" data-view="tasks">To-Do<span class="dot" id="dot-tasks" hidden>0</span></button>
+      <button class="tab" data-view="invoices">Invoices</button>
+      <button class="tab" data-view="messages">Messages<span class="dot" id="dot-msgs" hidden>0</span></button>
+    </nav>
+  </div>
+
+  <main class="wrap">
+    <div class="loader" id="boot">Loading your client zone…</div>
+
+    <!-- ================= HOME ================= -->
+    <section class="view" id="view-home">
+      <div class="view-head">
+        <div>
+          <h1 id="home-title">WELCOME</h1>
+          <p id="home-sub"></p>
+        </div>
+      </div>
+      <div id="home-welcome"></div>
+      <div id="home-resources"></div>
+    </section>
+
+    <!-- ================= DASHBOARD ================= -->
+    <section class="view" id="view-dashboard">
+      <div class="view-head">
+        <div>
+          <h1>PERFORMANCE</h1>
+          <p id="dash-period">Latest reporting period</p>
+        </div>
+      </div>
+      <div id="dash-body"></div>
+    </section>
+
+    <!-- ================= TASKS ================= -->
+    <section class="view" id="view-tasks">
+      <div class="view-head">
+        <div>
+          <h1>TO-DO LIST</h1>
+          <p>What's with us, and what we need from you.</p>
+        </div>
+      </div>
+      <div class="grid c2" id="tasks-body"></div>
+    </section>
+
+    <!-- ================= INVOICES ================= -->
+    <section class="view" id="view-invoices">
+      <div class="view-head">
+        <div>
+          <h1>INVOICES</h1>
+          <p>Download any invoice as a PDF.</p>
+        </div>
+        <div class="spacer"></div>
+        <div id="inv-outstanding"></div>
+      </div>
+      <div class="card" id="invoices-body"></div>
+    </section>
+
+    <!-- ================= MESSAGES ================= -->
+    <section class="view" id="view-messages">
+      <div class="view-head">
+        <div>
+          <h1>MESSAGES</h1>
+          <p>Talk to us directly — no email chains.</p>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn sm" id="btn-new-thread">+ New conversation</button>
+      </div>
+      <div class="msg-layout">
+        <aside class="thread-list" id="thread-list"></aside>
+        <div class="msg-pane">
+          <div class="msg-scroll" id="msg-scroll"></div>
+          <form class="composer" id="composer">
+            <textarea id="msg-input" placeholder="Write a message…" rows="1"></textarea>
+            <button class="btn" type="submit" id="btn-send">Send</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script type="module" src="cz-app.js"></script>
+</body>
+</html>

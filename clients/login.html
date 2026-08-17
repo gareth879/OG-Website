@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Client Zone — OmniGrowth</title>
+<link rel="icon" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cz.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="brand" style="margin-bottom:22px">
+      <img src="/logo.png" alt="OmniGrowth" onerror="this.style.display='none'">
+      <div class="brand-text">OMNI<span>GROWTH</span></div>
+    </div>
+
+    <!-- ===== sign in ===== -->
+    <section id="pane-signin">
+      <h1>CLIENT ZONE</h1>
+      <p class="sub">Your campaigns, creatives, tasks and invoices — all in one place.</p>
+      <div id="msg"></div>
+      <form id="form-signin">
+        <div class="field">
+          <label for="email">Email address</label>
+          <input id="email" type="email" autocomplete="email" required placeholder="you@company.com">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" required placeholder="••••••••">
+        </div>
+        <button class="btn" type="submit" id="btn-signin">Sign in →</button>
+      </form>
+      <div class="auth-alt"><a id="link-forgot">Forgot your password?</a></div>
+    </section>
+
+    <!-- ===== reset request ===== -->
+    <section id="pane-forgot" hidden>
+      <h1>RESET PASSWORD</h1>
+      <p class="sub">We'll email you a link to set a new password.</p>
+      <div id="msg-forgot"></div>
+      <form id="form-forgot">
+        <div class="field">
+          <label for="email-forgot">Email address</label>
+          <input id="email-forgot" type="email" autocomplete="email" required placeholder="you@company.com">
+        </div>
+        <button class="btn" type="submit" id="btn-forgot">Send reset link</button>
+      </form>
+      <div class="auth-alt"><a id="link-back">← Back to sign in</a></div>
+    </section>
+
+    <!-- ===== set new password (arrives from email link) ===== -->
+    <section id="pane-reset" hidden>
+      <h1>SET A PASSWORD</h1>
+      <p class="sub">Choose a password for your Client Zone account.</p>
+      <div id="msg-reset"></div>
+      <form id="form-reset">
+        <div class="field">
+          <label for="pw1">New password</label>
+          <input id="pw1" type="password" autocomplete="new-password" minlength="8" required>
+        </div>
+        <div class="field">
+          <label for="pw2">Confirm password</label>
+          <input id="pw2" type="password" autocomplete="new-password" minlength="8" required>
+        </div>
+        <button class="btn" type="submit" id="btn-reset">Save password →</button>
+      </form>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+import { sb, $, esc } from './cz-lib.js';
+
+const show = (id) => {
+  ['pane-signin', 'pane-forgot', 'pane-reset'].forEach((p) => { $('#' + p).hidden = (p !== id); });
+};
+const note = (box, kind, text) => { $(box).innerHTML = `<div class="notice ${kind}">${esc(text)}</div>`; };
+
+// A recovery / invite link drops the user here with a session already set.
+sb.auth.onAuthStateChange((event) => {
+  if (event === 'PASSWORD_RECOVERY') show('pane-reset');
+});
+
+// Already signed in and not mid-recovery? Go straight through.
+(async () => {
+  const hash = window.location.hash || '';
+  if (hash.includes('type=recovery') || hash.includes('type=invite')) { show('pane-reset'); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) window.location.replace('index.html');
+})();
+
+$('#link-forgot').onclick = () => show('pane-forgot');
+$('#link-back').onclick = () => show('pane-signin');
+
+$('#form-signin').onsubmit = async (e) => {
+  e.preventDefault();
+  const btn = $('#btn-signin');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  const { error } = await sb.auth.signInWithPassword({
+    email: $('#email').value.trim(),
+    password: $('#password').value,
+  });
+  if (error) {
+    note('#msg', 'err', error.message === 'Invalid login credentials'
+      ? 'That email and password combination is not recognised.'
+      : error.message);
+    btn.disabled = false; btn.textContent = 'Sign in →';
+    return;
+  }
+  window.location.replace('index.html');
+};
+
+$('#form-forgot').onsubmit = async (e) => {
+  e.preventDefault();
+  const btn = $('#btn-forgot');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const { error } = await sb.auth.resetPasswordForEmail($('#email-forgot').value.trim(), {
+    redirectTo: window.location.origin + window.location.pathname,
+  });
+  note('#msg-forgot', error ? 'err' : 'ok',
+    error ? error.message : 'Check your inbox — the reset link is on its way.');
+  btn.disabled = false; btn.textContent = 'Send reset link';
+};
+
+$('#form-reset').onsubmit = async (e) => {
+  e.preventDefault();
+  if ($('#pw1').value !== $('#pw2').value) {
+    note('#msg-reset', 'err', 'Those two passwords do not match.');
+    return;
+  }
+  const btn = $('#btn-reset');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const { error } = await sb.auth.updateUser({ password: $('#pw1').value });
+  if (error) {
+    note('#msg-reset', 'err', error.message);
+    btn.disabled = false; btn.textContent = 'Save password →';
+    return;
+  }
+  window.location.replace('index.html');
+};
+</script>
+</body>
+</html>

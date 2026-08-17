@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — OmniGrowth Client Zone</title>
+<link rel="icon" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cz.css">
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="admin.html">
+        <img src="/logo.png" alt="OmniGrowth" onerror="this.style.display='none'">
+        <span class="brand-text">OMNI<span>GROWTH</span> <span style="color:var(--dim);font-size:15px">ADMIN</span></span>
+      </a>
+      <div class="who">
+        <select id="client-picker" style="width:auto;min-width:220px"></select>
+        <button class="btn ghost sm" id="btn-new-client">+ Client</button>
+        <button class="btn ghost sm" id="btn-signout">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-view="links">Links</button>
+      <button class="tab" data-view="tasks">To-Do</button>
+      <button class="tab" data-view="invoices">Invoices</button>
+      <button class="tab" data-view="messages">Messages<span class="dot" id="dot-msgs" hidden>0</span></button>
+      <button class="tab" data-view="metrics">Dashboard data</button>
+      <button class="tab" data-view="settings">Settings &amp; users</button>
+    </nav>
+  </div>
+
+  <main class="wrap">
+    <div class="loader" id="boot">Loading admin console…</div>
+
+    <!-- ================= LINKS ================= -->
+    <section class="view" id="view-links">
+      <div class="view-head"><div><h1>CLIENT LINKS</h1>
+        <p>Drive folders, creatives, meeting recordings — anything the client should reach in one click.</p></div></div>
+      <div class="grid c2">
+        <div class="card">
+          <h2 style="font-size:20px;margin-bottom:14px">ADD A LINK</h2>
+          <form id="form-res">
+            <div class="row">
+              <div class="field"><label>Type</label>
+                <select id="res-kind">
+                  <option value="drive">Shared Drive</option>
+                  <option value="creatives">Creatives</option>
+                  <option value="recordings">Meeting recording</option>
+                  <option value="report">Report</option>
+                  <option value="other">Other</option>
+                </select></div>
+              <div class="field"><label>Label</label><input id="res-label" required placeholder="Q3 Creative Folder"></div>
+            </div>
+            <div class="field"><label>URL</label><input id="res-url" type="url" required placeholder="https://drive.google.com/..."></div>
+            <div class="field"><label>Description (optional)</label><input id="res-desc" placeholder="Static and video assets for the current flight"></div>
+            <button class="btn" type="submit">Add link</button>
+          </form>
+        </div>
+        <div class="card"><div id="res-list"></div></div>
+      </div>
+    </section>
+
+    <!-- ================= TASKS ================= -->
+    <section class="view" id="view-tasks">
+      <div class="view-head"><div><h1>TO-DO LIST</h1>
+        <p>Assign items to your team or to the client.</p></div></div>
+      <div class="grid c2">
+        <div class="card">
+          <h2 style="font-size:20px;margin-bottom:14px">ADD A TASK</h2>
+          <form id="form-todo">
+            <div class="field"><label>Title</label><input id="todo-title" required placeholder="Approve October ad creative"></div>
+            <div class="field"><label>Detail (optional)</label><textarea id="todo-detail" rows="2"></textarea></div>
+            <div class="row">
+              <div class="field"><label>Owner</label>
+                <select id="todo-owner"><option value="omnigrowth">OmniGrowth</option><option value="client">Client</option></select></div>
+              <div class="field"><label>Due date</label><input id="todo-due" type="date"></div>
+            </div>
+            <button class="btn" type="submit">Add task</button>
+          </form>
+        </div>
+        <div class="card"><div id="todo-list"></div></div>
+      </div>
+    </section>
+
+    <!-- ================= INVOICES ================= -->
+    <section class="view" id="view-invoices">
+      <div class="view-head"><div><h1>INVOICES</h1>
+        <p>Upload the PDF you already send by email — the client can then download it any time.</p></div></div>
+      <div class="card" style="margin-bottom:16px">
+        <h2 style="font-size:20px;margin-bottom:14px">NEW INVOICE</h2>
+        <form id="form-inv">
+          <div class="row">
+            <div class="field"><label>Invoice number</label><input id="inv-number" required placeholder="OG-2026-014"></div>
+            <div class="field"><label>Amount</label><input id="inv-amount" type="number" step="0.01" min="0" required placeholder="18500.00"></div>
+            <div class="field"><label>Currency</label>
+              <select id="inv-currency"><option>ZAR</option><option>USD</option><option>GBP</option><option>EUR</option></select></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Issue date</label><input id="inv-issue" type="date" required></div>
+            <div class="field"><label>Due date</label><input id="inv-due" type="date"></div>
+            <div class="field"><label>Status</label>
+              <select id="inv-status"><option value="sent">Sent</option><option value="paid">Paid</option><option value="draft">Draft (hidden from client)</option><option value="void">Void</option></select></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>PDF file</label><input id="inv-file" type="file" accept="application/pdf"></div>
+            <div class="field"><label>Note (optional)</label><input id="inv-notes" placeholder="September retainer"></div>
+          </div>
+          <button class="btn" type="submit" id="btn-inv">Save invoice</button>
+        </form>
+      </div>
+      <div class="card"><div id="inv-list"></div></div>
+    </section>
+
+    <!-- ================= MESSAGES ================= -->
+    <section class="view" id="view-messages">
+      <div class="view-head"><div><h1>MESSAGES</h1><p>Reply to clients directly.</p></div>
+        <div class="spacer"></div>
+        <button class="btn sm" id="btn-new-thread">+ New conversation</button></div>
+      <div class="msg-layout">
+        <aside class="thread-list" id="thread-list"></aside>
+        <div class="msg-pane">
+          <div class="msg-scroll" id="msg-scroll"></div>
+          <form class="composer" id="composer">
+            <textarea id="msg-input" placeholder="Reply…" rows="1"></textarea>
+            <button class="btn" type="submit" id="btn-send">Send</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= METRICS ================= -->
+    <section class="view" id="view-metrics">
+      <div class="view-head"><div><h1>DASHBOARD DATA</h1>
+        <p>Enter the numbers for a reporting period. These render as the client's performance dashboard.</p></div></div>
+      <div class="grid c2">
+        <div class="card">
+          <h2 style="font-size:20px;margin-bottom:14px">ADD / UPDATE A METRIC</h2>
+          <form id="form-metric">
+            <div class="row">
+              <div class="field"><label>Channel</label>
+                <select id="m-channel"><option value="email">Email</option><option value="meta">Meta ads</option><option value="other">Other</option></select></div>
+              <div class="field"><label>Key</label><input id="m-key" required placeholder="replies"></div>
+            </div>
+            <div class="field"><label>Display label</label><input id="m-label" required placeholder="Positive replies"></div>
+            <div class="row">
+              <div class="field"><label>Period start</label><input id="m-start" type="date" required></div>
+              <div class="field"><label>Period end</label><input id="m-end" type="date" required></div>
+            </div>
+            <div class="row">
+              <div class="field"><label>Value</label><input id="m-value" type="number" step="any" required></div>
+              <div class="field"><label>Target (optional)</label><input id="m-target" type="number" step="any"></div>
+              <div class="field"><label>Unit</label><input id="m-unit" placeholder="% or R or blank"></div>
+            </div>
+            <button class="btn" type="submit">Save metric</button>
+          </form>
+        </div>
+        <div class="card"><div id="metric-list"></div></div>
+      </div>
+    </section>
+
+    <!-- ================= SETTINGS ================= -->
+    <section class="view" id="view-settings">
+      <div class="view-head"><div><h1>SETTINGS &amp; USERS</h1>
+        <p>Portal welcome message and who can log in for this client.</p></div></div>
+      <div class="grid c2">
+        <div class="card">
+          <h2 style="font-size:20px;margin-bottom:14px">PORTAL SETTINGS</h2>
+          <form id="form-settings">
+            <div class="field"><label>Account manager</label><input id="set-am" placeholder="Gareth Foley"></div>
+            <div class="field"><label>Welcome note</label><textarea id="set-welcome" rows="4" placeholder="Shown at the top of their home page."></textarea></div>
+            <button class="btn" type="submit">Save settings</button>
+          </form>
+        </div>
+        <div class="card">
+          <h2 style="font-size:20px;margin-bottom:6px">USER ACCESS</h2>
+          <p style="font-size:13px;color:var(--dim);margin-bottom:14px">
+            Invite the person in Supabase → Authentication → Users → <em>Invite user</em>.
+            Once they appear below, attach them to a client here.
+          </p>
+          <div id="user-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script type="module" src="cz-admin.js"></script>
+</body>
+</html>
