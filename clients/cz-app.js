@@ -263,7 +263,7 @@ function renderInvoices() {
   }
 
   $('#invoices-body').innerHTML = `
-    <table>
+    <table class="stack-table">
       <thead><tr>
         <th>Invoice</th><th>Issued</th><th>Due</th><th>Status</th>
         <th class="num">Amount</th><th></th>
@@ -273,11 +273,11 @@ function renderInvoices() {
           const overdue = i.status === 'sent' && i.due_date && new Date(i.due_date) < new Date();
           const status = overdue ? 'overdue' : i.status;
           return `<tr>
-            <td><strong>${esc(i.number)}</strong>${i.notes ? `<div class="todo-detail">${esc(i.notes)}</div>` : ''}</td>
-            <td>${fmtDate(i.issue_date)}</td>
-            <td>${fmtDate(i.due_date)}</td>
-            <td><span class="pill ${INVOICE_PILL[status]}">${esc(status)}</span></td>
-            <td class="num">${money(i.amount_cents, i.currency)}</td>
+            <td data-l="Invoice"><strong>${esc(i.number)}</strong>${i.notes ? `<div class="todo-detail">${esc(i.notes)}</div>` : ''}</td>
+            <td data-l="Issued">${fmtDate(i.issue_date)}</td>
+            <td data-l="Due">${fmtDate(i.due_date)}</td>
+            <td data-l="Status"><span class="pill ${INVOICE_PILL[status]}">${esc(status)}</span></td>
+            <td class="num" data-l="Amount">${money(i.amount_cents, i.currency)}</td>
             <td class="num">${i.pdf_path
               ? `<button class="btn ghost sm" data-pdf="${esc(i.pdf_path)}">PDF ↓</button>`
               : '<span class="pill grey">No file</span>'}</td>

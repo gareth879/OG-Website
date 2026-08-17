@@ -160,7 +160,7 @@ function renderTodos() {
         <div class="todo-meta">
           <span class="pill ${t.owner === 'client' ? 'amber' : 'blue'}">${t.owner === 'client' ? 'Client' : 'OmniGrowth'}</span>
           ${t.due_date ? `<span class="pill grey">Due ${fmtDate(t.due_date)}</span>` : ''}
-          <select data-todo-status="${t.id}" style="width:auto;padding:5px 8px;font-size:12px">
+          <select data-todo-status="${t.id}" class="mini-select" style="width:auto">
             ${Object.keys(TODO_LABEL).map((s) => `<option value="${s}" ${t.status === s ? 'selected' : ''}>${TODO_LABEL[s]}</option>`).join('')}
           </select>
           <button class="btn ghost sm" data-todo-del="${t.id}">Delete</button>
@@ -195,13 +195,13 @@ function renderInvoices() {
     return;
   }
   box.innerHTML = `
-    <table><thead><tr>
+    <div class="table-wrap"><table><thead><tr>
       <th>Invoice</th><th>Issued</th><th>Due</th><th>Status</th><th class="num">Amount</th><th></th>
     </tr></thead><tbody>
       ${state.invoices.map((i) => `<tr>
         <td><strong>${esc(i.number)}</strong>${i.notes ? `<div class="todo-detail">${esc(i.notes)}</div>` : ''}</td>
         <td>${fmtDate(i.issue_date)}</td><td>${fmtDate(i.due_date)}</td>
-        <td><select data-inv-status="${i.id}" style="width:auto;padding:5px 8px;font-size:12px">
+        <td><select data-inv-status="${i.id}" class="mini-select" style="width:auto">
           ${['draft', 'sent', 'paid', 'overdue', 'void'].map((s) => `<option value="${s}" ${i.status === s ? 'selected' : ''}>${s}</option>`).join('')}
         </select></td>
         <td class="num">${money(i.amount_cents, i.currency)}</td>
@@ -250,14 +250,14 @@ function renderMetrics() {
     const items = state.metrics.filter((m) => m.period_start === start && m.period_end === end);
     return `<div style="margin-bottom:18px">
       <div class="col-title label">${fmtDate(start)} — ${fmtDate(end)}</div>
-      <table><tbody>
+      <div class="table-wrap"><table><tbody>
         ${items.map((m) => `<tr>
           <td><span class="pill ${m.channel === 'meta' ? 'purple' : 'blue'}">${esc(m.channel)}</span></td>
           <td>${esc(m.label)}</td>
           <td class="num"><strong>${esc(fmtNum(m.value, m.unit))}</strong>${m.target ? ` <span style="color:var(--dimmer)">/ ${esc(fmtNum(m.target, m.unit))}</span>` : ''}</td>
           <td class="num"><button class="btn ghost sm" data-m-del="${m.id}">✕</button></td>
         </tr>`).join('')}
-      </tbody></table></div>`;
+      </tbody></table></div></div>`;
   }).join('');
 
   $$('#metric-list [data-m-del]').forEach((b) => b.onclick = async () => {
@@ -328,19 +328,19 @@ function renderSettings() {
 function renderUsers() {
   const box = $('#user-list');
   if (!state.users.length) { box.innerHTML = `<div class="empty" style="padding:24px"><p>No users found.</p></div>`; return; }
-  box.innerHTML = `<table><tbody>
+  box.innerHTML = `<div class="table-wrap"><table><tbody>
     ${state.users.map((u) => `<tr>
       <td>${esc(u.email || u.id.slice(0, 8))}</td>
-      <td><select data-u-role="${u.id}" style="width:auto;padding:5px 8px;font-size:12px">
+      <td><select data-u-role="${u.id}" class="mini-select" style="width:auto">
         <option value="client" ${u.role === 'client' ? 'selected' : ''}>Client</option>
         <option value="operator" ${u.role === 'operator' ? 'selected' : ''}>Operator</option>
       </select></td>
-      <td><select data-u-client="${u.id}" style="width:auto;padding:5px 8px;font-size:12px">
+      <td><select data-u-client="${u.id}" class="mini-select" style="width:auto">
         <option value="">— no client —</option>
         ${state.clients.map((c) => `<option value="${c.id}" ${u.client_id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}
       </select></td>
     </tr>`).join('')}
-  </tbody></table>`;
+  </tbody></table></div>`;
 
   const patch = async (id, body) => {
     const { error } = await sb.from('profiles').update(body).eq('id', id);
