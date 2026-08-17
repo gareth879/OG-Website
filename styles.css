@@ -589,3 +589,21 @@ footer{background:#000;border-top:1px solid rgba(255,255,255,.06);padding:36px 4
   .footer-copy{color:rgba(255,255,255,.45)}
   .gpill{font-size:12.5px;padding:9px 16px}
 }
+
+
+/* CLIENT ZONE NAV LINK */
+nav .nav-client {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 7px 14px;
+  color: rgba(255, 255, 255, 0.75);
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+nav .nav-client:hover {
+  border-color: rgba(26, 110, 255, 0.55);
+  background: rgba(26, 110, 255, 0.1);
+  color: #fff;
+}
+@media (max-width: 900px) {
+  nav .nav-client { display: inline-block; margin-top: 8px; }
+}
