@@ -60,7 +60,9 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
 }
 .topbar-inner { display: flex; align-items: center; gap: 24px; height: 68px; }
 .brand { display: flex; align-items: center; gap: 12px; }
-.brand img { height: 30px; width: auto; }
+.brand img { height: 32px; width: auto; display: block; }
+.auth-brand { justify-content: center; margin-bottom: 26px; }
+.auth-brand img { height: 46px; }
 .brand-text { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; }
 .brand-text span { color: var(--blue); }
 
