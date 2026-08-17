@@ -39,9 +39,9 @@ const state = {
   if (state.profile.role === 'operator') $('#link-admin').hidden = false;
 
   if (!state.profile.client_id) {
-    fatal(state.profile.role === 'operator'
-      ? 'This is an operator login with no client attached — head to the Admin console.'
-      : 'Your login is not attached to a client account yet. Contact your account manager.');
+    // Operators have no client of their own — send them straight to the console.
+    if (state.profile.role === 'operator') { window.location.replace('admin.html'); return; }
+    fatal('Your login is not attached to a client account yet. Contact your account manager.');
     return;
   }
 
