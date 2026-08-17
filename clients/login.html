@@ -7,7 +7,7 @@
 <title>Client Zone — OmniGrowth</title>
 <link rel="icon" href="/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="cz.css">
+<link rel="stylesheet" href="cz.css?v=2">
 </head>
 <body>
 <div class="auth-page">
@@ -71,7 +71,7 @@
 </div>
 
 <script type="module">
-import { sb, $, esc } from './cz-lib.js';
+import { sb, $, esc } from './cz-lib.js?v=2';
 
 const show = (id) => {
   ['pane-signin', 'pane-forgot', 'pane-reset'].forEach((p) => { $('#' + p).hidden = (p !== id); });
