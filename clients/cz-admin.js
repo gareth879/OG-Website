@@ -6,6 +6,10 @@ import {
   INVOICE_PILL, TODO_PILL, TODO_LABEL, RESOURCE_META,
   requireSession, loadProfile, signOut, invoiceUrl,
 } from './cz-lib.js';
+import {
+  loadBillingSettings, loadTemplate, saveTemplate, describePeriod,
+  generateInvoice, generateMonthlyBatch, downloadPdfLocally, invoicesCsv, downloadCsv,
+} from './cz-billing.js';
 
 const state = {
   profile: null,
@@ -20,6 +24,8 @@ const state = {
   activeThread: null,
   messages: [],
   users: [],
+  billing: null,
+  template: null,
 };
 
 const LS_KEY = 'cz-admin-client';
@@ -49,8 +55,12 @@ const LS_KEY = 'cz-admin-client';
       <p>Use the “+ Client” button above to create your first one.</p></div>`;
   }
 
+  try { state.billing = await loadBillingSettings(); }
+  catch (e) { toast('Could not load invoice details: ' + e.message); }
+
   renderClientPicker();
   wireUI();
+  wireBilling();
 
   const saved = localStorage.getItem(LS_KEY);
   const first = state.clients.find((c) => c.id === saved) || state.clients[0];
@@ -95,6 +105,7 @@ async function loadClientData() {
   state.metrics = metrics.data || [];
   state.threads = threads.data || [];
   state.users = users.data || [];
+  state.template = await loadTemplate(cid);
   state.activeThread = null;
   state.messages = [];
   if (state.threads.length) await openThread(state.threads[0].id, false);
@@ -103,6 +114,7 @@ async function loadClientData() {
 function renderAll() {
   renderResources(); renderTodos(); renderInvoices(); renderMetrics();
   renderThreadList(); renderMessages(); renderSettings(); renderUsers(); renderBadges();
+  renderGenForm(); renderBillingForm();
 }
 
 /* ============================================================
@@ -529,6 +541,159 @@ function wireUI() {
     input.value = ''; input.style.height = 'auto';
     if (!state.messages.some((m) => m.id === data.id)) state.messages.push(data);
     renderMessages();
+  };
+}
+
+/* ============================================================
+   INVOICE GENERATION
+   ============================================================ */
+const thisPeriod = () => new Date().toISOString().slice(0, 7);
+const centsOf = (v) => Math.round(parseFloat(v || '0') * 100) || 0;
+
+function renderGenForm() {
+  const t = state.template;
+  const c = state.clients.find((x) => x.id === state.clientId);
+  $('#gen-name').value = t?.bill_to_name || c?.name || '';
+  $('#gen-address').value = t?.bill_to_address || '';
+  $('#gen-currency').value = t?.currency || 'USD';
+  $('#gen-amount').value = t ? (t.default_amount_cents / 100).toFixed(2) : '';
+  $('#gen-recurring').checked = t ? !!t.is_recurring : true;
+  if (!$('#gen-period').value) $('#gen-period').value = thisPeriod();
+  if (!$('#gen-issue').value) $('#gen-issue').valueAsDate = new Date();
+  syncDescription();
+}
+
+function currentTemplate() {
+  return {
+    client_id: state.clientId,
+    bill_to_name: $('#gen-name').value.trim(),
+    bill_to_address: $('#gen-address').value.trim() || null,
+    currency: $('#gen-currency').value,
+    default_amount_cents: centsOf($('#gen-amount').value),
+    description_template: state.template?.description_template || '{MONTH} {YYYY}',
+    is_recurring: $('#gen-recurring').checked,
+  };
+}
+
+function syncDescription() {
+  const period = $('#gen-period').value || thisPeriod();
+  const auto = describePeriod(state.template, period);
+  const box = $('#gen-desc');
+  if (!box.value || box.dataset.auto === 'true') { box.value = auto; box.dataset.auto = 'true'; }
+}
+
+function renderBillingForm() {
+  const b = state.billing;
+  if (!b) return;
+  const set = (id, v) => { const el = $(id); if (el) el.value = v ?? ''; };
+  set('#bl-address', b.address_line); set('#bl-phone', b.phone); set('#bl-email', b.email);
+  set('#bl-bank', b.bank_name); set('#bl-accname', b.account_name);
+  set('#bl-accnum', b.account_number); set('#bl-swift', b.swift_code);
+  set('#bl-terms', b.terms); set('#bl-next', b.next_invoice_number); set('#bl-overdue', b.overdue_after_days);
+}
+
+function draftInvoiceFromForm() {
+  const period = $('#gen-period').value || thisPeriod();
+  const issue = $('#gen-issue').value || new Date().toISOString().slice(0, 10);
+  const desc = $('#gen-desc').value.trim() || describePeriod(state.template, period);
+  const cents = centsOf($('#gen-amount').value);
+  return {
+    number: String(state.billing?.next_invoice_number ?? 0),
+    issue_date: issue,
+    currency: $('#gen-currency').value,
+    bill_to_name: $('#gen-name').value.trim(),
+    bill_to_address: $('#gen-address').value.trim(),
+    line_items: [{ description: desc, amount_cents: cents }],
+    amount_cents: cents,
+  };
+}
+
+function wireBilling() {
+  $('#gen-period').addEventListener('change', () => { $('#gen-desc').dataset.auto = 'true'; syncDescription(); });
+  $('#gen-desc').addEventListener('input', () => { $('#gen-desc').dataset.auto = 'false'; });
+
+  $('#btn-gen-save').onclick = async () => {
+    try {
+      state.template = await saveTemplate(currentTemplate());
+      toast('Template saved');
+    } catch (e) { toast(e.message); }
+  };
+
+  $('#btn-gen-preview').onclick = async () => {
+    if (!state.billing) return toast('Invoice details have not loaded yet');
+    try { await downloadPdfLocally(draftInvoiceFromForm(), state.billing); }
+    catch (e) { toast('Preview failed: ' + e.message); }
+  };
+
+  $('#form-gen').onsubmit = async (e) => {
+    e.preventDefault();
+    if (!state.billing) return toast('Invoice details have not loaded yet');
+    const btn = $('#btn-gen'); btn.disabled = true; btn.textContent = 'Generating…';
+    try {
+      const template = await saveTemplate(currentTemplate());
+      state.template = template;
+      const inv = await generateInvoice({
+        clientId: state.clientId, template, settings: state.billing,
+        period: $('#gen-period').value || thisPeriod(),
+        issueDate: $('#gen-issue').value || undefined,
+        amountCents: centsOf($('#gen-amount').value),
+        description: $('#gen-desc').value.trim() || undefined,
+      });
+      state.invoices.unshift(inv);
+      state.billing = await loadBillingSettings();
+      renderInvoices(); renderBillingForm();
+      toast(`Invoice ${inv.number} created as a draft`);
+    } catch (err) { toast(err.message); }
+    btn.disabled = false; btn.textContent = 'Generate invoice';
+  };
+
+  $('#btn-batch').onclick = async () => {
+    if (!state.billing) return toast('Invoice details have not loaded yet');
+    const period = $('#gen-period').value || thisPeriod();
+    if (!confirm(`Generate draft invoices for every recurring client for ${period}?`)) return;
+    const out = $('#batch-out');
+    const nameOf = (id) => (state.clients.find((c) => c.id === id) || {}).name || id.slice(0, 8);
+    const paint = (rows) => {
+      out.innerHTML = rows.map((r) => `<div class="todo-detail">${esc(nameOf(r.client_id))} —
+        ${r.number ? `<span class="pill green">created ${esc(r.number)}</span>`
+          : r.skipped ? `<span class="pill grey">${esc(r.skipped)}</span>`
+          : `<span class="pill red">${esc(r.error || 'failed')}</span>`}</div>`).join('');
+    };
+    out.innerHTML = '<div class="todo-detail">Working…</div>';
+    try {
+      const rows = await generateMonthlyBatch(period, state.billing, paint);
+      paint(rows);
+      state.billing = await loadBillingSettings();
+      await loadClientData(); renderAll();
+    } catch (e) { out.innerHTML = `<div class="notice err">${esc(e.message)}</div>`; }
+  };
+
+  $('#btn-csv').onclick = async () => {
+    try {
+      const csv = await invoicesCsv(state.clients);
+      downloadCsv(csv, `omnigrowth-invoices-${new Date().toISOString().slice(0, 10)}.csv`);
+    } catch (e) { toast(e.message); }
+  };
+
+  $('#form-billing').onsubmit = async (e) => {
+    e.preventDefault();
+    const row = {
+      id: true,
+      address_line: $('#bl-address').value.trim(),
+      phone: $('#bl-phone').value.trim(),
+      email: $('#bl-email').value.trim(),
+      bank_name: $('#bl-bank').value.trim(),
+      account_name: $('#bl-accname').value.trim(),
+      account_number: $('#bl-accnum').value.trim(),
+      swift_code: $('#bl-swift').value.trim(),
+      terms: $('#bl-terms').value.trim(),
+      next_invoice_number: parseInt($('#bl-next').value, 10) || 1,
+      overdue_after_days: parseInt($('#bl-overdue').value, 10) || 0,
+    };
+    const { data, error } = await sb.from('cz_billing_settings').upsert(row, { onConflict: 'id' }).select().single();
+    if (error) return toast(error.message);
+    state.billing = data;
+    toast('Invoice details saved');
   };
 }
 

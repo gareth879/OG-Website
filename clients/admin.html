@@ -7,7 +7,7 @@
 <title>Admin — OmniGrowth Client Zone</title>
 <link rel="icon" href="/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="cz.css?v=3">
+<link rel="stylesheet" href="cz.css?v=4">
 </head>
 <body>
 <div class="shell">
@@ -93,7 +93,48 @@
     <!-- ================= INVOICES ================= -->
     <section class="view" id="view-invoices">
       <div class="view-head"><div><h1>INVOICES</h1>
-        <p>Upload the PDF you already send by email — the client can then download it any time.</p></div></div>
+        <p>Generate from the client's template, or upload a PDF you produced elsewhere.</p></div>
+        <div class="spacer"></div>
+        <button class="btn ghost sm" id="btn-csv">Export CSV</button></div>
+
+      <div class="card" style="margin-bottom:16px">
+        <h2 style="font-size:20px;margin-bottom:6px">GENERATE INVOICE</h2>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:14px">
+          Creates a numbered PDF in your existing layout and files it as a <strong>draft</strong>.
+          Clients cannot see drafts — set it to Sent when you're happy.
+        </p>
+        <form id="form-gen">
+          <div class="row">
+            <div class="field"><label>Bill to</label><input id="gen-name" required placeholder="Schema Networks"></div>
+            <div class="field"><label>Currency</label>
+              <select id="gen-currency"><option>USD</option><option>ZAR</option><option>GBP</option><option>EUR</option></select></div>
+          </div>
+          <div class="field"><label>Billing address</label><textarea id="gen-address" rows="2" placeholder="2915 Red Hill Ave., Suite C103&#10;Costa Mesa, CA 92626"></textarea></div>
+          <div class="row">
+            <div class="field"><label>Period</label><input id="gen-period" type="month"></div>
+            <div class="field"><label>Issue date</label><input id="gen-issue" type="date"></div>
+            <div class="field"><label>Amount</label><input id="gen-amount" type="number" step="0.01" min="0" placeholder="1950.00"></div>
+          </div>
+          <div class="field"><label>Description</label><input id="gen-desc" placeholder="JULY 2026"></div>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--dim);margin-bottom:14px">
+            <input type="checkbox" id="gen-recurring" style="width:auto" checked> Recurring monthly retainer
+          </label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn" type="submit" id="btn-gen">Generate invoice</button>
+            <button class="btn ghost" type="button" id="btn-gen-save">Save template only</button>
+            <button class="btn ghost" type="button" id="btn-gen-preview">Preview PDF</button>
+          </div>
+        </form>
+        <div style="border-top:1px solid var(--line);margin-top:18px;padding-top:16px">
+          <div class="col-title label">Monthly run</div>
+          <p style="font-size:13px;color:var(--dim);margin-bottom:12px">
+            Generates a draft for every recurring client that hasn't been invoiced for the period yet.
+          </p>
+          <button class="btn ghost sm" type="button" id="btn-batch">Generate drafts for all recurring clients</button>
+          <div id="batch-out" style="margin-top:12px"></div>
+        </div>
+      </div>
+
       <div class="card" style="margin-bottom:16px">
         <h2 style="font-size:20px;margin-bottom:14px">NEW INVOICE</h2>
         <form id="form-inv">
@@ -188,10 +229,38 @@
           <div id="user-list"></div>
         </div>
       </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2 style="font-size:20px;margin-bottom:6px">INVOICE DETAILS</h2>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:14px">
+          Applies to every invoice you generate. Existing invoices keep the details they were issued with.
+        </p>
+        <form id="form-billing">
+          <div class="row">
+            <div class="field"><label>Business address</label><input id="bl-address"></div>
+            <div class="field"><label>Phone</label><input id="bl-phone"></div>
+            <div class="field"><label>Email</label><input id="bl-email"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Bank</label><input id="bl-bank"></div>
+            <div class="field"><label>Account name</label><input id="bl-accname"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Account number</label><input id="bl-accnum"></div>
+            <div class="field"><label>Swift code</label><input id="bl-swift"></div>
+          </div>
+          <div class="field"><label>Terms</label><input id="bl-terms"></div>
+          <div class="row">
+            <div class="field"><label>Next invoice number</label><input id="bl-next" type="number" min="1"></div>
+            <div class="field"><label>Days before overdue</label><input id="bl-overdue" type="number" min="0"></div>
+          </div>
+          <button class="btn" type="submit">Save invoice details</button>
+        </form>
+      </div>
     </section>
   </main>
 </div>
 
-<script type="module" src="cz-admin.js?v=3"></script>
+<script type="module" src="cz-admin.js?v=4"></script>
 </body>
 </html>

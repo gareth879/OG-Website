@@ -33,10 +33,12 @@ export function toast(msg, ms = 2600) {
 }
 
 /* ---------- formatting ---------- */
-export function money(cents, currency = 'ZAR') {
+const MONEY_LOCALE = { USD: 'en-US', ZAR: 'en-ZA', GBP: 'en-GB', EUR: 'en-IE' };
+
+export function money(cents, currency = 'USD') {
   const v = (Number(cents) || 0) / 100;
   try {
-    return new Intl.NumberFormat('en-ZA', {
+    return new Intl.NumberFormat(MONEY_LOCALE[currency] || 'en-US', {
       style: 'currency', currency, maximumFractionDigits: 2,
     }).format(v);
   } catch {
